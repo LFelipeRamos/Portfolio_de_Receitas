@@ -1,15 +1,17 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const AlunoReceita = sequelize.define('AlunoReceita', {
-
+const AlunoReceita = sequelize.define(
+  'AlunoReceita',
+  {
     criador: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-    }
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  },
+  {
+    freezeTableName: true,
+  },
+);
 
-}, {
-    freezeTableName: true
-});
-
-module.exports = AlunoReceita
+export default AlunoReceita;

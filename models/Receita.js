@@ -1,24 +1,25 @@
-const { DataTypes } = require('sequelize') //tipo de banco
-const sequelize = require('../config/database')//onde ta 
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const Receita = sequelize.define('Receita', {
-
+const Receita = sequelize.define(
+  'Receita',
+  {
     nome: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     descricao: {
-        type: DataTypes.STRING,
-        allowNull: false
-
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     link_externo: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    freezeTableName: true,
+  },
+);
 
-    }
-}, {
-    freezeTableName: true
-})
-
-module.exports = Receita
+export default Receita;

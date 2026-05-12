@@ -1,13 +1,16 @@
-const { DataTypes } = require('sequelize')
-const sequelize = require('../config/database')
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const AlunoHabilidade = sequelize.define('AlunoHabilidade', {
-
+const AlunoHabilidade = sequelize.define(
+  'AlunoHabilidade',
+  {
     nivel: {
-        type: DataTypes.INTEGER
-    }
-}, {
-    freezeTableName: true
-})
+      type: DataTypes.INTEGER,
+    },
+  },
+  {
+    freezeTableName: true,
+  },
+);
 
-module.exports = AlunoHabilidade
+export default AlunoHabilidade;

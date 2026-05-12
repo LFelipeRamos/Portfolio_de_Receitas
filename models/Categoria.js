@@ -1,17 +1,18 @@
-const { DataTypes } = require('sequelize')
-const sequelize = require('../config/database')
-const Receita = require('./Receita')
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const Categoria = sequelize.define('Categoria', {
-
+const Categoria = sequelize.define(
+  'Categoria',
+  {
     nome: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    }
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+  },
+  {
+    freezeTableName: true,
+  },
+);
 
-}, {
-    freezeTableName = true
-})
-
-module.exports = Categoria
+export default Categoria;
