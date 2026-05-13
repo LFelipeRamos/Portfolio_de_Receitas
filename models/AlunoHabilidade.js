@@ -6,6 +6,11 @@ const AlunoHabilidade = sequelize.define(
   {
     nivel: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        min: 0,
+        max: 10,
+      },
     },
   },
   {

@@ -1,4 +1,4 @@
-import Aluno from '../models/Aluno';
+import Aluno from '../models/Aluno.js';
 import bcrypt from 'bcrypt';
 
 const getAlunos = async (req, res) => {
@@ -48,19 +48,6 @@ const createAluno = async (req, res) => {
   }
 };
 
-const getIdAluno = async (req, res) => {
-  const { id } = req.params;
-
-  const aluno = await Aluno.findByPk(id);
-
-  if (!aluno) {
-    return res.status(404).json({
-      error: 'Aluno não encontrado',
-    });
-  }
-  return res.status(200).json(aluno);
-};
-
 const editAluno = async (req, res) => {
   const { id } = req.params;
   const { nome, email, senha, is_admin } = req.body;
@@ -73,12 +60,25 @@ const editAluno = async (req, res) => {
   }
 
   try {
-    await aluno.update({
-      nome,
-      email,
-      senha: await bcrypt.hash(senha, 10),
-      is_admin,
-    });
+    const dadosAtualizados = {};
+
+    if (nome !== undefined) {
+      dadosAtualizados.nome = nome;
+    }
+
+    if (email !== undefined) {
+      dadosAtualizados.email = email.trim().toLowerCase();
+    }
+
+    if (senha !== undefined) {
+      dadosAtualizados.senha = await bcrypt.hash(senha, 10);
+    }
+
+    if (is_admin !== undefined) {
+      dadosAtualizados.is_admin = is_admin;
+    }
+
+    await aluno.update(dadosAtualizados);
     return res.status(200).json({
       message: 'Aluno atualizado com sucesso',
     });
@@ -104,4 +104,4 @@ const deleteAluno = async (req, res) => {
     message: 'Aluno deletado com sucesso',
   });
 };
-export { getAlunos, createAluno, getIdAluno, editAluno, deleteAluno };
+export { getAlunos, createAluno, editAluno, deleteAluno };

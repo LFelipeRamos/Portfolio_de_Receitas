@@ -7,7 +7,7 @@ const Habilidade = sequelize.define(
     nome: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 1,
+      unique: true,
     },
   },
   {

@@ -1,4 +1,5 @@
-import Habilidade from '../models/Habilidade';
+import Habilidade from '../models/Habilidade.js';
+import Aluno from '../models/Aluno.js';
 
 const getHabilidades = async (req, res) => {
   const habilidade = await Habilidade.findAll({
@@ -49,35 +50,33 @@ const createHabilidade = async (req, res) => {
   }
 };
 
-const editHabilidade = async (req, res) => {
-  const { id } = req.params;
-  const { nome } = req.body;
+const getRelatorioHabilidades = async (req, res) => {
+  const totalAlunos = await Aluno.count();
 
-  if (!nome) {
-    return res.status(400).json({
-      error: 'Informe o nome da habilidade.',
-    });
-  }
+  const habilidades = await Habilidade.findAll({
+    include: Aluno,
+    order: [['nome', 'ASC']],
+  });
 
-  try {
-    const habilidade = await Habilidade.findByPk(id);
+  const relatorio = habilidades.map((habilidade) => {
+    const totalComHabilidade = habilidade.Alunos.length;
 
-    if (!habilidade) {
-      return res.status(404).json({
-        error: 'Habilidade não encontrada.',
-      });
-    }
+    return {
+      id: habilidade.id,
+      nome: habilidade.nome,
+      total_alunos: totalComHabilidade,
+      proporcao: totalAlunos === 0 ? 0 : totalComHabilidade / totalAlunos,
+      percentual:
+        totalAlunos === 0 ? 0 : (totalComHabilidade / totalAlunos) * 100,
+    };
+  });
 
-    habilidade.nome = nome;
-    await habilidade.update({ nome });
-    return res.status(200).json({
-      message: 'Habilidade atualizada com sucesso',
-    });
-  } catch {
-    return res.status(400).json({
-      error: 'Não foi possível atualizar a habilidade.',
-    });
-  }
+  return res.status(200).json(relatorio);
 };
 
-export { getHabilidades, getIdHabilidade, createHabilidade, editHabilidade };
+export {
+  getHabilidades,
+  getIdHabilidade,
+  createHabilidade,
+  getRelatorioHabilidades,
+};

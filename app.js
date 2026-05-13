@@ -6,9 +6,9 @@ import './config/associations.js';
 
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import receitaRoutes from './routes/receitaRoutes.js';
-// import alunoRoutes from './routes/alunoRoutes.js';
-// import habilidadeRoutes from './routes/habilidadeRoutes.js';
-//import alunoHabilidadeRoutes from './routes/alunoHabilidadeRoutes.js';
+import alunoRoutes from './routes/alunoRoutes.js';
+import habilidadeRoutes from './routes/habilidadeRoutes.js';
+// import alunoHabilidadeRoutes from './routes/alunoHabilidadeRoutes.js';
 
 const app = express();
 
@@ -17,9 +17,9 @@ app.use(express.json());
 
 app.use('/categorias', categoriaRoutes);
 app.use('/receitas', receitaRoutes);
-// app.use('/alunos', alunoRoutes);
-// app.use('/habilidades', habilidadeRoutes);
-//app.use('/aluno-habilidades', alunoHabilidadeRoutes);
+app.use('/alunos', alunoRoutes);
+app.use('/habilidades', habilidadeRoutes);
+// app.use('/aluno-habilidades', alunoHabilidadeRoutes);
 
 // rota teste
 app.get('/', (req, res) => {

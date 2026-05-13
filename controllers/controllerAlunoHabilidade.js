@@ -1,4 +1,4 @@
-import AlunoHabilidade from '../models/AlunoHabilidade';
+import AlunoHabilidade from '../models/AlunoHabilidade.js';
 
 const getAlunoHabilidades = async (req, res) => {
   const alunoHabilidade = await AlunoHabilidade.findAll();
@@ -27,9 +27,15 @@ const getIdAlunoHabilidade = async (req, res) => {
 const createAlunoHabilidade = async (req, res) => {
   const { aluno_id, habilidade_id, nivel } = req.body;
 
-  if (!aluno_id || !habilidade_id || !nivel) {
+  if (!aluno_id || !habilidade_id || nivel === undefined) {
     return res.status(400).json({
       error: 'Informe o id do aluno, da habilidade e o nível.',
+    });
+  }
+
+  if (nivel < 0 || nivel > 10) {
+    return res.status(400).json({
+      error: 'O nível deve estar entre 0 e 10.',
     });
   }
 
@@ -53,9 +59,15 @@ const editAlunoHabilidade = async (req, res) => {
   const { id } = req.params;
   const { aluno_id, habilidade_id, nivel } = req.body;
 
-  if (!aluno_id || !habilidade_id || !nivel) {
+  if (!aluno_id || !habilidade_id || nivel === undefined) {
     return res.status(400).json({
       error: 'Informe o aluno, a habilidade e o nível.',
+    });
+  }
+
+  if (nivel < 0 || nivel > 10) {
+    return res.status(400).json({
+      error: 'O nível deve estar entre 0 e 10.',
     });
   }
 
