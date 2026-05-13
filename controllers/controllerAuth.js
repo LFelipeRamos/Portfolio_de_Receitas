@@ -51,4 +51,16 @@ const logout = (req, res) => {
   });
 };
 
-export { login, logout };
+const me = (req, res) => {
+  if (!req.session.aluno) {
+    return res.status(401).json({
+      aluno: null,
+    });
+  }
+
+  return res.status(200).json({
+    aluno: req.session.aluno,
+  });
+};
+
+export { login, logout, me };

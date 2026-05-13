@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 
 const getAlunos = async (req, res) => {
   const aluno = await Aluno.findAll({
+    attributes: ['id', 'nome', 'email', 'is_admin'],
     order: [['nome', 'ASC']],
   });
 

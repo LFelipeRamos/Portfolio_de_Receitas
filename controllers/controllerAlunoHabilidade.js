@@ -1,7 +1,15 @@
 import AlunoHabilidade from '../models/AlunoHabilidade.js';
 
 const getAlunoHabilidades = async (req, res) => {
-  const alunoHabilidade = await AlunoHabilidade.findAll();
+  const where = {};
+
+  if (!req.session.aluno.is_admin) {
+    where.aluno_id = req.session.aluno.id;
+  }
+
+  const alunoHabilidade = await AlunoHabilidade.findAll({
+    where,
+  });
 
   if (alunoHabilidade.length === 0) {
     return res.status(404).json({
@@ -13,6 +21,12 @@ const getAlunoHabilidades = async (req, res) => {
 
 const getIdAlunoHabilidade = async (req, res) => {
   const { alunoId, habilidadeId } = req.params;
+
+  if (!req.session.aluno.is_admin && Number(alunoId) !== req.session.aluno.id) {
+    return res.status(403).json({
+      error: 'Você só pode visualizar suas próprias habilidades.',
+    });
+  }
 
   const alunoHabilidade = await AlunoHabilidade.findOne({
     where: {

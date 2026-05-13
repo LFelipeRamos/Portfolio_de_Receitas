@@ -13,8 +13,8 @@ import {
 
 const router = express.Router();
 
-router.get('/', getAlunoHabilidades);
-router.get('/:alunoId/:habilidadeId', getIdAlunoHabilidade);
+router.get('/', requireLogin, getAlunoHabilidades);
+router.get('/:alunoId/:habilidadeId', requireLogin, getIdAlunoHabilidade);
 router.post(
   '/',
   requireLogin,

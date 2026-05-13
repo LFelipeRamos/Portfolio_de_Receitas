@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
+    "dev": "npm run build && node app.js",
+    "client": "vite",
+    "build": "vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -17,17 +19,26 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "mongoose": "^9.6.2",
     "pg": "^8.20.0",
     "pg-hstore": "^2.3.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "nodemon": "^3.1.14",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "vite": "^8.0.12"
   },
   "repository": {
     "type": "git",

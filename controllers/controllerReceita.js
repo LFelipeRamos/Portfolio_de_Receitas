@@ -6,7 +6,13 @@ import AlunoReceita from '../models/AlunoReceita.js';
 
 const getReceitas = async (req, res) => {
   const receita = await Receita.findAll({
-    include: [Categoria, Aluno],
+    include: [
+      Categoria,
+      {
+        model: Aluno,
+        attributes: ['id', 'nome', 'email', 'is_admin'],
+      },
+    ],
     order: [['nome', 'ASC']],
   });
 
@@ -22,7 +28,13 @@ const getReceitas = async (req, res) => {
 const getIdReceita = async (req, res) => {
   const { id } = req.params;
   const receita = await Receita.findByPk(id, {
-    include: [Categoria, Aluno],
+    include: [
+      Categoria,
+      {
+        model: Aluno,
+        attributes: ['id', 'nome', 'email', 'is_admin'],
+      },
+    ],
   });
 
   if (!receita) {
@@ -44,7 +56,10 @@ const getReceitasPorCategoria = async (req, res) => {
           id: categoriaId,
         },
       },
-      Aluno,
+      {
+        model: Aluno,
+        attributes: ['id', 'nome', 'email', 'is_admin'],
+      },
     ],
     order: [['nome', 'ASC']],
   });
@@ -69,6 +84,12 @@ const createReceita = async (req, res) => {
       });
     }
 
+    if (!Array.isArray(categorias) || categorias.length === 0) {
+      return res.status(400).json({
+        error: 'Informe pelo menos uma categoria.',
+      });
+    }
+
     if (
       !req.session.aluno.is_admin &&
       !alunosResponsaveis.includes(req.session.aluno.id)
@@ -90,13 +111,11 @@ const createReceita = async (req, res) => {
     });
 
     // categorias
-    if (Array.isArray(categorias) && categorias.length > 0) {
-      for (const categoriaId of categorias) {
-        await ReceitaCategoria.create({
-          receita_id: receita.id,
-          categoria_id: categoriaId,
-        });
-      }
+    for (const categoriaId of categorias) {
+      await ReceitaCategoria.create({
+        receita_id: receita.id,
+        categoria_id: categoriaId,
+      });
     }
 
     // alunos
@@ -153,6 +172,12 @@ const updateReceita = async (req, res) => {
     await receita.update(dadosAtualizados);
 
     if (Array.isArray(categorias)) {
+      if (categorias.length === 0) {
+        return res.status(400).json({
+          error: 'Informe pelo menos uma categoria.',
+        });
+      }
+
       await ReceitaCategoria.destroy({
         where: {
           receita_id: receita.id,
@@ -168,6 +193,12 @@ const updateReceita = async (req, res) => {
     }
 
     if (Array.isArray(alunos)) {
+      if (alunos.length === 0) {
+        return res.status(400).json({
+          error: 'Informe pelo menos um aluno responsável.',
+        });
+      }
+
       await AlunoReceita.destroy({
         where: {
           receita_id: receita.id,
