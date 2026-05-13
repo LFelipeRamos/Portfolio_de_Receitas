@@ -4,15 +4,16 @@ import Aluno from '../models/Aluno.js';
 import Habilidade from '../models/Habilidade.js';
 import AlunoHabilidade from '../models/AlunoHabilidade.js';
 import AlunoReceita from '../models/AlunoReceita.js';
+import ReceitaCategoria from '../models/ReceitaCategoria.js';
 
 Receita.belongsToMany(Categoria, {
-  through: 'ReceitaCategoria',
+  through: ReceitaCategoria,
   foreignKey: 'receita_id',
   otherKey: 'categoria_id',
 });
 
 Categoria.belongsToMany(Receita, {
-  through: 'ReceitaCategoria',
+  through: ReceitaCategoria,
   foreignKey: 'categoria_id',
   otherKey: 'receita_id',
 });

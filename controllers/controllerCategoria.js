@@ -50,7 +50,7 @@ const createCategoria = async (req, res) => {
   }
 };
 
-const editCategoria = async (req, res) => {
+const updateCategoria = async (req, res) => {
   const { id } = req.params;
   const { nome } = req.body;
 
@@ -107,6 +107,6 @@ export {
   getCategorias,
   getIdCategoria,
   createCategoria,
-  editCategoria,
+  updateCategoria,
   deleteCategoria,
 };

@@ -50,6 +50,59 @@ const createHabilidade = async (req, res) => {
   }
 };
 
+const updateHabilidade = async (req, res) => {
+  const { id } = req.params;
+  const { nome } = req.body;
+
+  if (!nome) {
+    return res.status(400).json({
+      error: 'Informe o nome da habilidade.',
+    });
+  }
+
+  const habilidade = await Habilidade.findByPk(id);
+
+  if (!habilidade) {
+    return res.status(404).json({
+      error: 'Habilidade não encontrada.',
+    });
+  }
+
+  try {
+    await habilidade.update({ nome });
+    return res.status(200).json({
+      message: 'Habilidade atualizada com sucesso',
+    });
+  } catch {
+    return res.status(400).json({
+      error: 'Não foi possível atualizar a habilidade.',
+    });
+  }
+};
+
+const deleteHabilidade = async (req, res) => {
+  const { id } = req.params;
+
+  const habilidade = await Habilidade.findByPk(id);
+
+  if (!habilidade) {
+    return res.status(404).json({
+      error: 'Habilidade não encontrada.',
+    });
+  }
+
+  try {
+    await habilidade.destroy();
+    return res.status(200).json({
+      message: 'Habilidade excluída com sucesso.',
+    });
+  } catch {
+    return res.status(400).json({
+      error: 'Não foi possível excluir a habilidade.',
+    });
+  }
+};
+
 const getRelatorioHabilidades = async (req, res) => {
   const totalAlunos = await Aluno.count();
 
@@ -78,5 +131,7 @@ export {
   getHabilidades,
   getIdHabilidade,
   createHabilidade,
+  updateHabilidade,
+  deleteHabilidade,
   getRelatorioHabilidades,
 };

@@ -12,9 +12,14 @@ const getAlunoHabilidades = async (req, res) => {
 };
 
 const getIdAlunoHabilidade = async (req, res) => {
-  const { id } = req.params;
+  const { alunoId, habilidadeId } = req.params;
 
-  const alunoHabilidade = await AlunoHabilidade.findByPk(id);
+  const alunoHabilidade = await AlunoHabilidade.findOne({
+    where: {
+      aluno_id: alunoId,
+      habilidade_id: habilidadeId,
+    },
+  });
 
   if (!alunoHabilidade) {
     return res.status(404).json({
@@ -55,13 +60,14 @@ const createAlunoHabilidade = async (req, res) => {
     });
   }
 };
-const editAlunoHabilidade = async (req, res) => {
-  const { id } = req.params;
-  const { aluno_id, habilidade_id, nivel } = req.body;
 
-  if (!aluno_id || !habilidade_id || nivel === undefined) {
+const updateAlunoHabilidade = async (req, res) => {
+  const { alunoId, habilidadeId } = req.params;
+  const { nivel } = req.body;
+
+  if (nivel === undefined) {
     return res.status(400).json({
-      error: 'Informe o aluno, a habilidade e o nível.',
+      error: 'Informe o nível.',
     });
   }
 
@@ -71,7 +77,12 @@ const editAlunoHabilidade = async (req, res) => {
     });
   }
 
-  const alunoHabilidade = await AlunoHabilidade.findByPk(id);
+  const alunoHabilidade = await AlunoHabilidade.findOne({
+    where: {
+      aluno_id: alunoId,
+      habilidade_id: habilidadeId,
+    },
+  });
 
   if (!alunoHabilidade) {
     return res.status(404).json({
@@ -81,8 +92,6 @@ const editAlunoHabilidade = async (req, res) => {
 
   try {
     await alunoHabilidade.update({
-      aluno_id,
-      habilidade_id,
       nivel,
     });
 
@@ -97,9 +106,14 @@ const editAlunoHabilidade = async (req, res) => {
 };
 
 const deleteAlunoHabilidade = async (req, res) => {
-  const { id } = req.params;
+  const { alunoId, habilidadeId } = req.params;
 
-  const alunoHabilidade = await AlunoHabilidade.findByPk(id);
+  const alunoHabilidade = await AlunoHabilidade.findOne({
+    where: {
+      aluno_id: alunoId,
+      habilidade_id: habilidadeId,
+    },
+  });
 
   if (!alunoHabilidade) {
     return res.status(404).json({
@@ -123,7 +137,7 @@ const deleteAlunoHabilidade = async (req, res) => {
 export {
   getAlunoHabilidades,
   createAlunoHabilidade,
-  editAlunoHabilidade,
+  updateAlunoHabilidade,
   deleteAlunoHabilidade,
   getIdAlunoHabilidade,
 };

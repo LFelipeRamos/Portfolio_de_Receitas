@@ -1,6 +1,8 @@
 import Receita from '../models/Receita.js';
 import Categoria from '../models/Categoria.js';
 import Aluno from '../models/Aluno.js';
+import ReceitaCategoria from '../models/ReceitaCategoria.js';
+import AlunoReceita from '../models/AlunoReceita.js';
 
 const getReceitas = async (req, res) => {
   const receita = await Receita.findAll({
@@ -59,10 +61,24 @@ const getReceitasPorCategoria = async (req, res) => {
 const createReceita = async (req, res) => {
   try {
     const { nome, descricao, link_externo, categorias, alunos } = req.body;
+    const alunosResponsaveis = alunos || [];
 
     if (!nome || !descricao || !link_externo) {
       return res.status(400).json({
         error: 'Informe nome, descrição e link externo.',
+      });
+    }
+
+    if (
+      !req.session.aluno.is_admin &&
+      !alunosResponsaveis.includes(req.session.aluno.id)
+    ) {
+      alunosResponsaveis.push(req.session.aluno.id);
+    }
+
+    if (alunosResponsaveis.length === 0) {
+      return res.status(400).json({
+        error: 'Informe pelo menos um aluno responsável.',
       });
     }
 
@@ -75,24 +91,25 @@ const createReceita = async (req, res) => {
 
     // categorias
     if (Array.isArray(categorias) && categorias.length > 0) {
-      const categoriasEncontradas = await Categoria.findAll({
-        where: {
-          id: categorias,
-        },
-      });
-
-      await receita.addCategoria(categoriasEncontradas);
+      for (const categoriaId of categorias) {
+        await ReceitaCategoria.create({
+          receita_id: receita.id,
+          categoria_id: categoriaId,
+        });
+      }
     }
 
     // alunos
-    if (Array.isArray(alunos) && alunos.length > 0) {
-      const alunosEncontrados = await Aluno.findAll({
-        where: {
-          id: alunos,
-        },
-      });
+    for (const alunoId of alunosResponsaveis) {
+      const alunoExiste = await Aluno.findByPk(alunoId);
 
-      await receita.addAlunos(alunosEncontrados);
+      if (alunoExiste) {
+        await AlunoReceita.create({
+          receita_id: receita.id,
+          aluno_id: alunoId,
+          criador: alunoId === req.session.aluno.id,
+        });
+      }
     }
 
     return res.status(201).json({
@@ -105,7 +122,8 @@ const createReceita = async (req, res) => {
     });
   }
 };
-const editReceita = async (req, res) => {
+
+const updateReceita = async (req, res) => {
   const { id } = req.params;
   const { nome, descricao, link_externo, categorias, alunos } = req.body;
 
@@ -135,23 +153,33 @@ const editReceita = async (req, res) => {
     await receita.update(dadosAtualizados);
 
     if (Array.isArray(categorias)) {
-      const categoriasEncontradas = await Categoria.findAll({
+      await ReceitaCategoria.destroy({
         where: {
-          id: categorias,
+          receita_id: receita.id,
         },
       });
 
-      await receita.setCategoria(categoriasEncontradas);
+      for (const categoriaId of categorias) {
+        await ReceitaCategoria.create({
+          receita_id: receita.id,
+          categoria_id: categoriaId,
+        });
+      }
     }
 
     if (Array.isArray(alunos)) {
-      const alunosEncontrados = await Aluno.findAll({
+      await AlunoReceita.destroy({
         where: {
-          id: alunos,
+          receita_id: receita.id,
         },
       });
 
-      await receita.setAlunos(alunosEncontrados);
+      for (const alunoId of alunos) {
+        await AlunoReceita.create({
+          receita_id: receita.id,
+          aluno_id: alunoId,
+        });
+      }
     }
 
     return res.status(200).json({
@@ -163,6 +191,7 @@ const editReceita = async (req, res) => {
     });
   }
 };
+
 const deleteReceita = async (req, res) => {
   const { id } = req.params;
 
@@ -192,6 +221,6 @@ export {
   getIdReceita,
   getReceitasPorCategoria,
   createReceita,
-  editReceita,
+  updateReceita,
   deleteReceita,
 };

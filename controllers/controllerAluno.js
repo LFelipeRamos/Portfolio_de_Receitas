@@ -15,7 +15,7 @@ const getAlunos = async (req, res) => {
 };
 
 const createAluno = async (req, res) => {
-  const { nome, email, senha } = req.body;
+  const { nome, email, senha, is_admin } = req.body;
 
   if (!nome || !email || !senha) {
     return res.status(400).json({
@@ -31,11 +31,13 @@ const createAluno = async (req, res) => {
   }
 
   try {
+    const totalAlunos = await Aluno.count();
+
     await Aluno.create({
       nome,
       email: emailLimpo,
       senha: await bcrypt.hash(senha, 10),
-      is_admin: false,
+      is_admin: totalAlunos === 0 ? true : is_admin,
     });
 
     return res.status(201).json({
@@ -48,7 +50,7 @@ const createAluno = async (req, res) => {
   }
 };
 
-const editAluno = async (req, res) => {
+const updateAluno = async (req, res) => {
   const { id } = req.params;
   const { nome, email, senha, is_admin } = req.body;
 
@@ -104,4 +106,4 @@ const deleteAluno = async (req, res) => {
     message: 'Aluno deletado com sucesso',
   });
 };
-export { getAlunos, createAluno, editAluno, deleteAluno };
+export { getAlunos, createAluno, updateAluno, deleteAluno };

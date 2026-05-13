@@ -5,9 +5,13 @@ import {
   getIdReceita,
   getReceitasPorCategoria,
   createReceita,
-  editReceita,
+  updateReceita,
   deleteReceita,
 } from '../controllers/controllerReceita.js';
+import {
+  requireLogin,
+  requireReceitaResponsavel,
+} from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -21,12 +25,12 @@ router.get('/categoria/:categoriaId', getReceitasPorCategoria);
 router.get('/:id', getIdReceita);
 
 // CREATE
-router.post('/', createReceita);
+router.post('/', requireLogin, createReceita);
 
 // UPDATE
-router.put('/:id', editReceita);
+router.put('/:id', requireReceitaResponsavel, updateReceita);
 
 // DELETE
-router.delete('/:id', deleteReceita);
+router.delete('/:id', requireReceitaResponsavel, deleteReceita);
 
 export default router;

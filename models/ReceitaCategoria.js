@@ -1,20 +1,16 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const AlunoReceita = sequelize.define(
-  'AlunoReceita',
+const ReceitaCategoria = sequelize.define(
+  'ReceitaCategoria',
   {
-    aluno_id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-    },
     receita_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
-    criador: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+    categoria_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
     },
   },
   {
@@ -22,4 +18,4 @@ const AlunoReceita = sequelize.define(
   },
 );
 
-export default AlunoReceita;
+export default ReceitaCategoria;

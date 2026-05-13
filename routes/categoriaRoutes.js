@@ -3,16 +3,17 @@ import {
   getCategorias,
   getIdCategoria,
   createCategoria,
-  editCategoria,
+  updateCategoria,
   deleteCategoria,
 } from '../controllers/controllerCategoria.js';
+import { requireAdmin } from '../middlewares/auth.js';
 
 const router = express.Router();
 
 router.get('/', getCategorias);
 router.get('/:id', getIdCategoria);
-router.post('/', createCategoria);
-router.put('/:id', editCategoria);
-router.delete('/:id', deleteCategoria);
+router.post('/', requireAdmin, createCategoria);
+router.put('/:id', requireAdmin, updateCategoria);
+router.delete('/:id', requireAdmin, deleteCategoria);
 
 export default router;

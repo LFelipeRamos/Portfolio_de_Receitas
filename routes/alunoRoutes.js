@@ -2,15 +2,16 @@ import express from 'express';
 import {
   getAlunos,
   createAluno,
-  editAluno,
+  updateAluno,
   deleteAluno,
 } from '../controllers/controllerAluno.js';
+import { requireAdmin, requireAdminOrFirstAluno } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-router.get('/', getAlunos);
-router.post('/', createAluno);
-router.put('/:id', editAluno);
-router.delete('/:id', deleteAluno);
+router.get('/', requireAdmin, getAlunos);
+router.post('/', requireAdminOrFirstAluno, createAluno);
+router.put('/:id', requireAdmin, updateAluno);
+router.delete('/:id', requireAdmin, deleteAluno);
 
 export default router;
