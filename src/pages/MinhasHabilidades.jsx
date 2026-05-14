@@ -110,7 +110,7 @@ function MinhasHabilidades({ aluno }) {
 
   if (!aluno) {
     return (
-      <section>
+      <section className="page-section page-card narrow-section">
         <h2>Minhas habilidades</h2>
         <p>Faça login para editar suas habilidades.</p>
       </section>
@@ -118,10 +118,12 @@ function MinhasHabilidades({ aluno }) {
   }
 
   return (
-    <section>
-      <h2>Minhas habilidades</h2>
+    <section className="page-section page-card narrow-section">
+      <div className="section-heading">
+        <h2>Minhas habilidades</h2>
+      </div>
 
-      <form onSubmit={salvar}>
+      <form className="panel-form" onSubmit={salvar}>
         <label>
           Habilidade
           <select
@@ -151,9 +153,9 @@ function MinhasHabilidades({ aluno }) {
         <button>Adicionar</button>
       </form>
 
-      {mensagem && <p className="mensagem">{mensagem}</p>}
+      {mensagem && <p className="mensagem form-message">{mensagem}</p>}
 
-      <div className="lista">
+      <div className="lista skill-list">
         {alunoHabilidades.map((item) => (
           <div className="box" key={`${item.aluno_id}-${item.habilidade_id}`}>
             <strong>{nomeHabilidade(item.habilidade_id)}</strong>
@@ -164,7 +166,9 @@ function MinhasHabilidades({ aluno }) {
               defaultValue={item.nivel}
               onBlur={(e) => atualizar(item, e.target.value)}
             />
-            <button onClick={() => apagar(item)}>Excluir</button>
+            <button className="button-danger" onClick={() => apagar(item)}>
+              Excluir
+            </button>
           </div>
         ))}
       </div>

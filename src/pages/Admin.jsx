@@ -258,7 +258,7 @@ function Admin({ aluno, recarregar }) {
 
   if (!aluno?.is_admin) {
     return (
-      <section>
+      <section className="page-section page-card narrow-section">
         <h2>Admin</h2>
         <p>Faça login como administrador.</p>
       </section>
@@ -266,14 +266,16 @@ function Admin({ aluno, recarregar }) {
   }
 
   return (
-    <section>
-      <h2>Admin</h2>
+    <section className="page-section page-card">
+      <div className="section-heading">
+        <h2>Admin</h2>
+      </div>
       {mensagem && <p className="mensagem">{mensagem}</p>}
 
       <div className="colunas">
         <div className="box">
           <h3>Alunos</h3>
-          <form onSubmit={criarAluno}>
+          <form className="compact-form" onSubmit={criarAluno}>
             <input
               placeholder="Nome"
               value={nomeAluno}
@@ -301,17 +303,32 @@ function Admin({ aluno, recarregar }) {
           </form>
 
           {alunos.map((item) => (
-            <div key={item.id}>
-              <p>
-                {item.nome} {item.is_admin ? '(admin)' : ''}
-                <button onClick={() => abrirEditarAluno(item)}>Editar</button>
-                <button onClick={() => apagar(`/alunos/${item.id}`)}>
-                  Excluir
-                </button>
-              </p>
+            <div className="admin-item" key={item.id}>
+              <div className="admin-item__row">
+                <span>
+                  {item.nome} {item.is_admin ? <strong>Admin</strong> : ''}
+                </span>
+                <div className="actions-row">
+                  <button
+                    className="button-secondary"
+                    onClick={() => abrirEditarAluno(item)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="button-danger"
+                    onClick={() => apagar(`/alunos/${item.id}`)}
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
 
               {alunoEditando === item.id && (
-                <form onSubmit={atualizarAluno}>
+                <form
+                  className="compact-form edit-form"
+                  onSubmit={atualizarAluno}
+                >
                   <input
                     placeholder="Nome"
                     value={editarNomeAluno}
@@ -339,7 +356,7 @@ function Admin({ aluno, recarregar }) {
 
         <div className="box">
           <h3>Categorias</h3>
-          <form onSubmit={criarCategoria}>
+          <form className="compact-form" onSubmit={criarCategoria}>
             <input
               placeholder="Nome"
               value={nomeCategoria}
@@ -349,19 +366,30 @@ function Admin({ aluno, recarregar }) {
           </form>
 
           {categorias.map((item) => (
-            <div key={item.id}>
-              <p>
-                {item.nome}
-                <button onClick={() => abrirEditarCategoria(item)}>
-                  Editar
-                </button>
-                <button onClick={() => apagar(`/categorias/${item.id}`)}>
-                  Excluir
-                </button>
-              </p>
+            <div className="admin-item" key={item.id}>
+              <div className="admin-item__row">
+                <span>{item.nome}</span>
+                <div className="actions-row">
+                  <button
+                    className="button-secondary"
+                    onClick={() => abrirEditarCategoria(item)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="button-danger"
+                    onClick={() => apagar(`/categorias/${item.id}`)}
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
 
               {categoriaEditando === item.id && (
-                <form onSubmit={atualizarCategoria}>
+                <form
+                  className="compact-form edit-form"
+                  onSubmit={atualizarCategoria}
+                >
                   <input
                     placeholder="Nome"
                     value={editarNomeCategoria}
@@ -376,7 +404,7 @@ function Admin({ aluno, recarregar }) {
 
         <div className="box">
           <h3>Habilidades</h3>
-          <form onSubmit={criarHabilidade}>
+          <form className="compact-form" onSubmit={criarHabilidade}>
             <input
               placeholder="Nome"
               value={nomeHabilidade}
@@ -386,19 +414,30 @@ function Admin({ aluno, recarregar }) {
           </form>
 
           {habilidades.map((item) => (
-            <div key={item.id}>
-              <p>
-                {item.nome}
-                <button onClick={() => abrirEditarHabilidade(item)}>
-                  Editar
-                </button>
-                <button onClick={() => apagar(`/habilidades/${item.id}`)}>
-                  Excluir
-                </button>
-              </p>
+            <div className="admin-item" key={item.id}>
+              <div className="admin-item__row">
+                <span>{item.nome}</span>
+                <div className="actions-row">
+                  <button
+                    className="button-secondary"
+                    onClick={() => abrirEditarHabilidade(item)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="button-danger"
+                    onClick={() => apagar(`/habilidades/${item.id}`)}
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
 
               {habilidadeEditando === item.id && (
-                <form onSubmit={atualizarHabilidade}>
+                <form
+                  className="compact-form edit-form"
+                  onSubmit={atualizarHabilidade}
+                >
                   <input
                     placeholder="Nome"
                     value={editarNomeHabilidade}

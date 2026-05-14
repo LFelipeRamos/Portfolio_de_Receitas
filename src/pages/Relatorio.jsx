@@ -20,28 +20,34 @@ function Relatorio() {
   }, []);
 
   return (
-    <section>
-      <h2>Relatório de habilidades</h2>
+    <section className="page-section page-card">
+      <div className="section-heading">
+        <h2>Relatório de habilidades</h2>
+      </div>
       {mensagem && <p className="mensagem">{mensagem}</p>}
 
-      <table>
-        <thead>
-          <tr>
-            <th>Habilidade</th>
-            <th>Alunos</th>
-            <th>Percentual</th>
-          </tr>
-        </thead>
-        <tbody>
-          {relatorio.map((item) => (
-            <tr key={item.id}>
-              <td>{item.nome}</td>
-              <td>{item.total_alunos}</td>
-              <td>{Number(item.percentual).toFixed(1)}%</td>
+      <div className="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Habilidade</th>
+              <th>Alunos</th>
+              <th>Percentual</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {relatorio.map((item) => (
+              <tr key={item.id}>
+                <td>{item.nome}</td>
+                <td>{item.total_alunos}</td>
+                <td>
+                  <strong>{Number(item.percentual).toFixed(1)}%</strong>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

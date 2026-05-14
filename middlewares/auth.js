@@ -22,7 +22,6 @@ const requireAdmin = (req, res, next) => {
 };
 
 const requireAdminOrFirstAluno = async (req, res, next) => {
-  //faz com que o primeiro aluno seja admin
   const totalAlunos = await Aluno.count();
 
   if (totalAlunos === 0) {

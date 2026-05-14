@@ -53,7 +53,7 @@ const logout = (req, res) => {
 
 const me = (req, res) => {
   if (!req.session.aluno) {
-    return res.status(401).json({
+    return res.status(200).json({
       aluno: null,
     });
   }

@@ -48,24 +48,61 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <header>
-        <h1>Portfólio de Receitas</h1>
-        <p>Receitas cadastradas pelos alunos</p>
+    <div className="app-shell">
+      <header className="app-header">
+        <div>
+          <h1>Portfólio de Receitas</h1>
+          <p>Receitas, habilidades e contribuições organizadas por alunos.</p>
+        </div>
+
+        <div className="user-status">
+          <strong>{aluno ? aluno.nome : 'Visitante'}</strong>
+          <span>
+            {aluno?.is_admin ? 'Administrador' : aluno ? 'Aluno' : 'Sem login'}
+          </span>
+        </div>
       </header>
 
-      <nav>
-        <button onClick={() => mudarPagina('receitas')}>Receitas</button>
-        <button onClick={() => mudarPagina('relatorio')}>Relatório</button>
-        <button onClick={() => mudarPagina('login')}>Login</button>
-        <button onClick={novaReceita}>Nova receita</button>
-        <button onClick={() => mudarPagina('habilidades')}>
+      <nav className="app-nav" aria-label="Navegação principal">
+        <button
+          className={pagina === 'receitas' ? 'active' : ''}
+          onClick={() => mudarPagina('receitas')}
+        >
+          Receitas
+        </button>
+        <button
+          className={pagina === 'novaReceita' ? 'active' : ''}
+          onClick={novaReceita}
+        >
+          Nova receita
+        </button>
+        <button
+          className={pagina === 'habilidades' ? 'active' : ''}
+          onClick={() => mudarPagina('habilidades')}
+        >
           Minhas habilidades
         </button>
-        <button onClick={() => mudarPagina('admin')}>Admin</button>
+        <button
+          className={pagina === 'relatorio' ? 'active' : ''}
+          onClick={() => mudarPagina('relatorio')}
+        >
+          Relatório
+        </button>
+        <button
+          className={pagina === 'admin' ? 'active' : ''}
+          onClick={() => mudarPagina('admin')}
+        >
+          Admin
+        </button>
+        <button
+          className={pagina === 'login' ? 'active' : ''}
+          onClick={() => mudarPagina('login')}
+        >
+          Login
+        </button>
       </nav>
 
-      <main>
+      <main className="app-main">
         {pagina === 'receitas' && (
           <Receitas
             aluno={aluno}

@@ -15,10 +15,12 @@ function ReceitaForm({
   const [alunos, setAlunos] = useState([]);
   const [mensagem, setMensagem] = useState('');
 
-  function pegarValoresSelecionados(event) {
-    return Array.from(event.target.selectedOptions).map((option) =>
-      Number(option.value),
-    );
+  function alternarSelecao(lista, valor) {
+    if (lista.includes(valor)) {
+      return lista.filter((item) => item !== valor);
+    }
+
+    return [...lista, valor];
   }
 
   async function carregarDados() {
@@ -104,7 +106,7 @@ function ReceitaForm({
 
   if (!aluno) {
     return (
-      <section>
+      <section className="page-section page-card narrow-section">
         <h2>Nova receita</h2>
         <p>Faça login para cadastrar receitas.</p>
       </section>
@@ -112,10 +114,12 @@ function ReceitaForm({
   }
 
   return (
-    <section>
-      <h2>{receitaEditando ? 'Editar receita' : 'Nova receita'}</h2>
+    <section className="page-section page-card narrow-section">
+      <div className="section-heading">
+        <h2>{receitaEditando ? 'Editar receita' : 'Nova receita'}</h2>
+      </div>
 
-      <form onSubmit={salvarReceita}>
+      <form className="panel-form" onSubmit={salvarReceita}>
         <label>
           Nome
           <input value={nome} onChange={(e) => setNome(e.target.value)} />
@@ -137,40 +141,50 @@ function ReceitaForm({
           />
         </label>
 
-        <label>
-          Categorias
-          <select
-            multiple
-            value={categoriaIds.map(String)}
-            onChange={(e) => setCategoriaIds(pegarValoresSelecionados(e))}
-          >
+        <fieldset className="choice-group">
+          <legend>Categorias</legend>
+          <div className="choice-list">
             {categorias.map((categoria) => (
-              <option key={categoria.id} value={categoria.id}>
+              <label className="choice-item" key={categoria.id}>
+                <input
+                  type="checkbox"
+                  checked={categoriaIds.includes(categoria.id)}
+                  onChange={() =>
+                    setCategoriaIds(alternarSelecao(categoriaIds, categoria.id))
+                  }
+                />
+                <span />
                 {categoria.nome}
-              </option>
+              </label>
             ))}
-          </select>
-        </label>
+          </div>
+        </fieldset>
 
-        <label>
-          Alunos responsáveis
-          <select
-            multiple
-            value={alunoIds.map(String)}
-            onChange={(e) => setAlunoIds(pegarValoresSelecionados(e))}
-          >
+        <fieldset className="choice-group">
+          <legend>Alunos responsáveis</legend>
+          <div className="choice-list">
             {alunos.map((aluno) => (
-              <option key={aluno.id} value={aluno.id}>
+              <label className="choice-item" key={aluno.id}>
+                <input
+                  type="checkbox"
+                  checked={alunoIds.includes(aluno.id)}
+                  onChange={() =>
+                    setAlunoIds(alternarSelecao(alunoIds, aluno.id))
+                  }
+                />
+                <span />
                 {aluno.nome}
-              </option>
+              </label>
             ))}
-          </select>
-        </label>
+          </div>
+        </fieldset>
 
-        <button>Salvar</button>
+        <button>
+          {receitaEditando ? 'Atualizar receita' : 'Salvar receita'}
+        </button>
       </form>
 
-      {mensagem && <p className="mensagem">{mensagem}</p>}
+      {mensagem && <p className="mensagem form-message">{mensagem}</p>}
     </section>
   );
 }

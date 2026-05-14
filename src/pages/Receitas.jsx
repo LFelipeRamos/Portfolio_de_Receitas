@@ -116,6 +116,20 @@ function Receitas({ aluno, recarregar, editarReceita }) {
     }
   }
 
+  function podeAlterarReceita(receita) {
+    if (!aluno) {
+      return false;
+    }
+
+    if (aluno.is_admin) {
+      return true;
+    }
+
+    return (receita.Alunos || []).some(
+      (responsavel) => responsavel.id === aluno.id,
+    );
+  }
+
   useEffect(() => {
     carregarCategorias();
   }, []);
@@ -129,89 +143,141 @@ function Receitas({ aluno, recarregar, editarReceita }) {
   }, [receitas]);
 
   return (
-    <section>
-      <h2>Receitas</h2>
+    <section className="page-section page-card">
+      <div className="section-heading">
+        <h2>Receitas</h2>
 
-      <label>
-        Filtrar por categoria
-        <select
-          value={categoriaId}
-          onChange={(e) => setCategoriaId(e.target.value)}
-        >
-          <option value="">Todas</option>
-          {categorias.map((categoria) => (
-            <option key={categoria.id} value={categoria.id}>
-              {categoria.nome}
-            </option>
-          ))}
-        </select>
-      </label>
+        <label className="filter-control">
+          Filtrar por categoria
+          <select
+            value={categoriaId}
+            onChange={(e) => setCategoriaId(e.target.value)}
+          >
+            <option value="">Todas</option>
+            {categorias.map((categoria) => (
+              <option key={categoria.id} value={categoria.id}>
+                {categoria.nome}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       {mensagem && <p className="mensagem">{mensagem}</p>}
 
-      <div className="lista">
+      <div className="recipe-grid">
         {receitas.map((receita) => (
-          <div className="box" key={receita.id}>
-            <h3>{receita.nome}</h3>
-            <p>{receita.descricao}</p>
-            <a href={receita.link_externo} target="_blank">
-              Link externo
-            </a>
+          <article className="recipe-card" key={receita.id}>
+            <div className="recipe-card__header">
+              <h3>{receita.nome}</h3>
 
-            <p>
-              Categorias:{' '}
-              {(receita.Categoria || receita.Categorias || [])
-                .map((categoria) => categoria.nome)
-                .join(', ') || 'sem categoria'}
-            </p>
+              {receita.link_externo && (
+                <a
+                  className="external-link"
+                  href={receita.link_externo}
+                  target="_blank"
+                >
+                  Abrir fonte
+                </a>
+              )}
+            </div>
 
-            <p>
-              Responsáveis:{' '}
-              {(receita.Alunos || []).map((aluno) => aluno.nome).join(', ') ||
-                'sem aluno'}
-            </p>
+            <p className="recipe-description">{receita.descricao}</p>
 
-            {aluno && (
-              <>
-                <button onClick={() => editarReceita(receita)}>Editar</button>
-                <button onClick={() => apagarReceita(receita.id)}>
+            <div className="meta-list">
+              <div>
+                <span>Categorias</span>
+                <strong>
+                  {(receita.Categoria || receita.Categorias || [])
+                    .map((categoria) => categoria.nome)
+                    .join(', ') || 'Sem categoria'}
+                </strong>
+              </div>
+
+              <div>
+                <span>Responsáveis</span>
+                <strong>
+                  {(receita.Alunos || [])
+                    .map((aluno) => aluno.nome)
+                    .join(', ') || 'Sem aluno'}
+                </strong>
+              </div>
+            </div>
+
+            {podeAlterarReceita(receita) && (
+              <div className="actions-row">
+                <button
+                  className="button-secondary"
+                  onClick={() => editarReceita(receita)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="button-danger"
+                  onClick={() => apagarReceita(receita.id)}
+                >
                   Excluir
                 </button>
-              </>
+              </div>
             )}
 
             <div className="comentarios">
-              <h4>Comentários</h4>
+              <div className="comments-heading">
+                <h4>Comentários</h4>
+                <span>{(comentarios[receita.id] || []).length}</span>
+              </div>
 
-              {(comentarios[receita.id] || []).map((comentario) => (
-                <p key={comentario._id}>
-                  <strong>{comentario.nome}:</strong> {comentario.texto}
-                </p>
-              ))}
+              <div className="comments-list">
+                {(comentarios[receita.id] || []).map((comentario) => (
+                  <p key={comentario._id}>
+                    <strong>{comentario.nome}</strong>
+                    <span>{comentario.texto}</span>
+                  </p>
+                ))}
+              </div>
 
-              {receitaComentando !== receita.id && (
-                <button onClick={() => setReceitaComentando(receita.id)}>
-                  Comentar
+              {receitaComentando === receita.id ? (
+                <form
+                  className="comment-form"
+                  onSubmit={(e) => salvarComentario(e, receita.id)}
+                >
+                  <label>
+                    Nome
+                    <input
+                      placeholder="Seu nome"
+                      value={nomeComentario}
+                      onChange={(e) => setNomeComentario(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    Comentário
+                    <textarea
+                      placeholder="Escreva seu comentário"
+                      value={textoComentario}
+                      onChange={(e) => setTextoComentario(e.target.value)}
+                    />
+                  </label>
+                  <div className="actions-row">
+                    <button>Publicar comentário</button>
+                    <button
+                      className="button-quiet"
+                      type="button"
+                      onClick={() => setReceitaComentando(null)}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  className="comment-trigger"
+                  onClick={() => setReceitaComentando(receita.id)}
+                >
+                  Adicionar comentário
                 </button>
               )}
-
-              {receitaComentando === receita.id && (
-                <form onSubmit={(e) => salvarComentario(e, receita.id)}>
-                  <input
-                    placeholder="Seu nome"
-                    value={nomeComentario}
-                    onChange={(e) => setNomeComentario(e.target.value)}
-                  />
-                  <textarea
-                    placeholder="Comentário"
-                    value={textoComentario}
-                    onChange={(e) => setTextoComentario(e.target.value)}
-                  />
-                  <button>Salvar comentário</button>
-                </form>
-              )}
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </section>

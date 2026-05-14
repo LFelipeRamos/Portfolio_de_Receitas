@@ -76,7 +76,8 @@ const getReceitasPorCategoria = async (req, res) => {
 const createReceita = async (req, res) => {
   try {
     const { nome, descricao, link_externo, categorias, alunos } = req.body;
-    const alunosResponsaveis = alunos || [];
+    const categoriasSelecionadas = [...new Set(categorias || [])];
+    const alunosResponsaveis = [...new Set(alunos || [])];
 
     if (!nome || !descricao || !link_externo) {
       return res.status(400).json({
@@ -84,7 +85,7 @@ const createReceita = async (req, res) => {
       });
     }
 
-    if (!Array.isArray(categorias) || categorias.length === 0) {
+    if (!Array.isArray(categorias) || categoriasSelecionadas.length === 0) {
       return res.status(400).json({
         error: 'Informe pelo menos uma categoria.',
       });
@@ -103,6 +104,30 @@ const createReceita = async (req, res) => {
       });
     }
 
+    const totalCategorias = await Categoria.count({
+      where: {
+        id: categoriasSelecionadas,
+      },
+    });
+
+    if (totalCategorias !== categoriasSelecionadas.length) {
+      return res.status(400).json({
+        error: 'Uma ou mais categorias informadas não existem.',
+      });
+    }
+
+    const totalAlunos = await Aluno.count({
+      where: {
+        id: alunosResponsaveis,
+      },
+    });
+
+    if (totalAlunos !== alunosResponsaveis.length) {
+      return res.status(400).json({
+        error: 'Um ou mais alunos responsáveis não existem.',
+      });
+    }
+
     // cria receita
     const receita = await Receita.create({
       nome,
@@ -111,7 +136,7 @@ const createReceita = async (req, res) => {
     });
 
     // categorias
-    for (const categoriaId of categorias) {
+    for (const categoriaId of categoriasSelecionadas) {
       await ReceitaCategoria.create({
         receita_id: receita.id,
         categoria_id: categoriaId,
@@ -120,15 +145,11 @@ const createReceita = async (req, res) => {
 
     // alunos
     for (const alunoId of alunosResponsaveis) {
-      const alunoExiste = await Aluno.findByPk(alunoId);
-
-      if (alunoExiste) {
-        await AlunoReceita.create({
-          receita_id: receita.id,
-          aluno_id: alunoId,
-          criador: alunoId === req.session.aluno.id,
-        });
-      }
+      await AlunoReceita.create({
+        receita_id: receita.id,
+        aluno_id: alunoId,
+        criador: alunoId === req.session.aluno.id,
+      });
     }
 
     return res.status(201).json({
@@ -172,9 +193,23 @@ const updateReceita = async (req, res) => {
     await receita.update(dadosAtualizados);
 
     if (Array.isArray(categorias)) {
-      if (categorias.length === 0) {
+      const categoriasSelecionadas = [...new Set(categorias)];
+
+      if (categoriasSelecionadas.length === 0) {
         return res.status(400).json({
           error: 'Informe pelo menos uma categoria.',
+        });
+      }
+
+      const totalCategorias = await Categoria.count({
+        where: {
+          id: categoriasSelecionadas,
+        },
+      });
+
+      if (totalCategorias !== categoriasSelecionadas.length) {
+        return res.status(400).json({
+          error: 'Uma ou mais categorias informadas não existem.',
         });
       }
 
@@ -184,7 +219,7 @@ const updateReceita = async (req, res) => {
         },
       });
 
-      for (const categoriaId of categorias) {
+      for (const categoriaId of categoriasSelecionadas) {
         await ReceitaCategoria.create({
           receita_id: receita.id,
           categoria_id: categoriaId,
@@ -193,9 +228,23 @@ const updateReceita = async (req, res) => {
     }
 
     if (Array.isArray(alunos)) {
-      if (alunos.length === 0) {
+      const alunosResponsaveis = [...new Set(alunos)];
+
+      if (alunosResponsaveis.length === 0) {
         return res.status(400).json({
           error: 'Informe pelo menos um aluno responsável.',
+        });
+      }
+
+      const totalAlunos = await Aluno.count({
+        where: {
+          id: alunosResponsaveis,
+        },
+      });
+
+      if (totalAlunos !== alunosResponsaveis.length) {
+        return res.status(400).json({
+          error: 'Um ou mais alunos responsáveis não existem.',
         });
       }
 
@@ -205,7 +254,7 @@ const updateReceita = async (req, res) => {
         },
       });
 
-      for (const alunoId of alunos) {
+      for (const alunoId of alunosResponsaveis) {
         await AlunoReceita.create({
           receita_id: receita.id,
           aluno_id: alunoId,
