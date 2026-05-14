@@ -494,3 +494,7 @@ ISC
 ---
 
 **Dúvidas?** Abra uma issue no repositório.
+
+## Agradecimento
+
+Agradeço de coração ao meu grande amigo e mentor [rayan6ms](https://github.com/rayan6ms) por me auxiliar no decorrer do desenvolvimento do projeto.
