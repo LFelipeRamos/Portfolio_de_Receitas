@@ -6,55 +6,184 @@ Sistema web para gerenciamento de receitas, alunos, habilidades e comentários.
 
 A forma mais simples de rodar o projeto localmente é com Docker. A aplicação sobe com PostgreSQL, MongoDB e o servidor Node em containers separados.
 
-### Linux
+Os scripts de setup fazem automaticamente:
+
+- verificam se Docker está instalado
+- instalam ou orientam a instalação do Docker quando possível
+- iniciam/verificam o Docker
+- criam ou corrigem o arquivo `.env`
+- escolhem automaticamente uma porta livre para a aplicação
+- executam `docker compose up --build -d`
+
+Por padrão, a aplicação tenta usar:
+
+```text
+http://localhost:3000
+```
+
+Se a porta `3000` já estiver ocupada, o script usa automaticamente `3001`, `3002`, etc.
+
+---
+
+## 🐧 Linux e 🍎 macOS
+
+Na pasta do projeto:
 
 ```bash
 cd Portfolio_de_Receitas
-chmod +x setup-docker-linux.sh
-./setup-docker-linux.sh
+chmod +x setup-docker.sh
+./setup-docker.sh
 ```
 
-### Outras plataformas
+O script detecta automaticamente se o sistema é Linux ou macOS.
 
-Se você estiver no macOS ou Windows, instale o Docker Desktop e rode os comandos abaixo na pasta do projeto:
+No Linux, ele tenta instalar e iniciar o Docker Engine automaticamente.
+
+No macOS, ele usa Docker Desktop. Se Docker Desktop não estiver instalado, o script tenta instalar via Homebrew. Se você não tiver Homebrew, instale o Docker Desktop manualmente:
+
+```text
+https://docs.docker.com/desktop/setup/install/mac-install/
+```
+
+Depois abra o Docker Desktop e rode novamente:
 
 ```bash
-docker compose up -d --build
+./setup-docker.sh
 ```
 
-O `docker compose` vai ler o arquivo `.env` da raiz do projeto automaticamente. Se o arquivo não existir, crie um com as variáveis da seção de instalação manual.
+---
 
-**Após terminar, acesse:** `http://localhost:3000`
+## 🪟 Windows
+
+No Windows, use PowerShell.
+
+Abra o PowerShell na pasta do projeto e rode:
+
+```powershell
+.\setup-docker-windows.ps1
+```
+
+Se o PowerShell bloquear a execução do script, rode:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\setup-docker-windows.ps1
+```
+
+Esse comando libera a execução de scripts somente para a sessão atual do PowerShell.
+
+Se preferir, você também pode usar o arquivo `.bat`:
+
+```text
+setup-docker-windows.bat
+```
+
+O script verifica se Docker está instalado. Se Docker não estiver instalado, ele tenta instalar o Docker Desktop via `winget`.
+
+Se a instalação automática não funcionar, instale o Docker Desktop manualmente:
+
+```text
+https://docs.docker.com/desktop/setup/install/windows-install/
+```
+
+Depois abra o Docker Desktop e rode novamente o script.
+
+---
+
+## ✅ Após o setup
+
+Ao final, o script mostra a URL correta da aplicação, por exemplo:
+
+```text
+http://localhost:3000
+```
+
+ou, se a porta `3000` estiver ocupada:
+
+```text
+http://localhost:3001
+```
 
 **Credenciais padrão:**
 
 - Email: `admin@gmail.com`
 - Senha: `123456`
 
-### Gerenciar containers
+---
+
+## ⚙️ Arquivo `.env`
+
+O arquivo `.env` é criado automaticamente pelos scripts de setup.
+
+Para Docker, ele deve usar os nomes dos serviços do `docker-compose.yml`:
+
+```env
+DB_HOST=postgres
+MONGO_URL=mongodb://mongodb:27017/portfolio_receitas
+```
+
+Não use isto dentro do Docker:
+
+```env
+DB_HOST=localhost
+MONGO_URL=mongodb://localhost:27017/portfolio_receitas
+```
+
+Dentro de um container, `localhost` aponta para o próprio container, não para os containers do PostgreSQL ou MongoDB.
+
+Exemplo de `.env` usado pelo Docker:
+
+```env
+APP_PORT=3000
+
+DB_NAME=p_receita
+DB_USER=postgres
+DB_PASSWORD=123456
+DB_HOST=postgres
+DB_DIALECT=postgres
+
+SESSION_SECRET=uma_chave_gerada_automaticamente
+
+MONGO_URL=mongodb://mongodb:27017/portfolio_receitas
+
+ADMIN_NAME=Admin
+ADMIN_EMAIL=admin@gmail.com
+ADMIN_PASSWORD=123456
+```
+
+O script pode criar um backup do `.env` antigo como `.env.backup` se detectar configurações incompatíveis com Docker.
+
+---
+
+## 🧰 Gerenciar containers
 
 ```bash
 # Ver logs em tempo real
 docker compose logs -f
 
+# Ver logs somente da aplicação
+docker compose logs -f app
+
 # Parar containers
 docker compose down
 
-# Parar e remover volumes (limpa dados)
+# Parar containers e remover volumes, apagando dados dos bancos
 docker compose down -v
 ```
 
 ---
 
-## 📋 Requisitos (sem Docker)
+## 📋 Requisitos para instalação manual, sem Docker
 
-Se preferir instalar localmente:
+Se preferir instalar localmente sem Docker:
 
-- Node.js 20+ instalado
-- PostgreSQL rodando
-- MongoDB rodando
+- Node.js 20+
+- PostgreSQL rodando localmente
+- MongoDB rodando localmente
 
-## 🛠️ Instalação manual
+---
+
+## 🛠️ Instalação manual, sem Docker
 
 1. Clone o repositório:
 
@@ -69,15 +198,17 @@ cd Portfolio_de_Receitas
 npm install
 ```
 
-3. Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo:
+3. Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-DB_NAME=portfolio_receitas
+DB_NAME=p_receita
 DB_USER=postgres
 DB_PASSWORD=sua_senha
 DB_HOST=localhost
 DB_DIALECT=postgres
+
 MONGO_URL=mongodb://localhost:27017/portfolio_receitas
+
 SESSION_SECRET=uma_chave_secreta_forte
 
 ADMIN_NAME=Admin
@@ -89,29 +220,34 @@ ADMIN_PASSWORD=123456
 
 ```bash
 psql -U postgres
-CREATE DATABASE portfolio_receitas;
+CREATE DATABASE p_receita;
 \q
 ```
 
-5. Inicie os serviços e a aplicação:
+5. Inicie a aplicação:
 
 ```bash
-# Terminal 1: Iniciar a aplicação
 npm run dev
 ```
 
-A aplicação estará em: `http://localhost:3000`
+A aplicação estará em:
+
+```text
+http://localhost:3000
+```
+
+---
 
 ## 📦 Scripts disponíveis
 
 ```bash
-# Modo desenvolvimento (com build automático)
+# Modo desenvolvimento
 npm run dev
 
 # Build do frontend
 npm run build
 
-# Abrir frontend com Vite (desenvolvimento)
+# Abrir frontend com Vite
 npm run client
 
 # Verificar código com ESLint
@@ -121,19 +257,47 @@ npm run lint
 npm run lint:fix
 ```
 
+---
+
 ## 🗄️ Bancos de dados
 
 ### PostgreSQL
 
-O banco é criado automaticamente pelo `sequelize.sync()` na primeira execução. As tabelas também são criadas automaticamente.
+Usado para armazenar os dados relacionais da aplicação.
+
+No Docker, o PostgreSQL roda no serviço:
+
+```text
+postgres
+```
+
+Internamente, a aplicação se conecta usando:
+
+```env
+DB_HOST=postgres
+```
 
 ### MongoDB
 
 Usado para armazenar dados de sessão e outros documentos.
 
+No Docker, o MongoDB roda no serviço:
+
+```text
+mongodb
+```
+
+Internamente, a aplicação se conecta usando:
+
+```env
+MONGO_URL=mongodb://mongodb:27017/portfolio_receitas
+```
+
+---
+
 ## 👤 Primeiro acesso
 
-Na primeira vez que a aplicação inicia, cria automaticamente um usuário admin com as credenciais do `.env`:
+Na primeira vez que a aplicação inicia, ela cria automaticamente um usuário admin com as credenciais do `.env`:
 
 - `ADMIN_NAME`
 - `ADMIN_EMAIL`
@@ -141,72 +305,187 @@ Na primeira vez que a aplicação inicia, cria automaticamente um usuário admin
 
 Se o usuário já existir, ele não será recriado.
 
+Credenciais padrão criadas pelos scripts:
+
+- Email: `admin@gmail.com`
+- Senha: `123456`
+
+---
+
 ## 📁 Estrutura do projeto
 
-```
+```text
 Portfolio_de_Receitas/
-├── config/           # Configurações de banco e associações
-├── controllers/      # Lógica dos endpoints
-├── middlewares/      # Middlewares (autenticação, etc)
-├── models/          # Modelos Sequelize
-├── routes/          # Definição de rotas
-├── src/             # Frontend React
-│   ├── pages/       # Páginas da aplicação
+├── config/                    # Configurações de banco e associações
+├── controllers/               # Lógica dos endpoints
+├── middlewares/               # Middlewares
+├── models/                    # Modelos Sequelize
+├── routes/                    # Definição de rotas
+├── src/                       # Frontend React
+│   ├── pages/                 # Páginas da aplicação
 │   ├── App.jsx
 │   └── main.jsx
-├── app.js           # Servidor Express
-├── vite.config.js   # Configuração Vite
+├── app.js                     # Servidor Express
+├── vite.config.js             # Configuração Vite
 ├── package.json
-├── Dockerfile       # Imagem Docker
-├── docker-compose.yml  # Orquestração Docker
+├── package-lock.json
+├── Dockerfile                 # Imagem Docker da aplicação
+├── docker-compose.yml         # PostgreSQL, MongoDB e app
+├── setup-docker.sh            # Setup para Linux e macOS
+├── setup-docker-windows.ps1   # Setup para Windows PowerShell
+├── setup-docker-windows.bat   # Atalho opcional para Windows
+├── .env.example               # Exemplo de variáveis de ambiente
+├── .dockerignore
 └── README.md
 ```
 
+---
+
 ## 🤝 Tecnologias
 
-- **Backend:** Node.js, Express, Sequelize, MongoDB/Mongoose
+- **Backend:** Node.js, Express, Sequelize, Mongoose
 - **Frontend:** React, Vite
 - **Banco de dados:** PostgreSQL, MongoDB
 - **Containerização:** Docker, Docker Compose
+
+---
 
 ## 📝 Observações
 
 - O backend usa `sequelize.sync()` para criar tabelas automaticamente
 - O frontend é buildado para `dist/` e servido pelo Express
 - A autenticação é baseada em sessão com bcrypt
-- Admin automático só é criado se não existir
-- Todos os dados do Docker Compose ficam em volumes persistentes
+- O usuário admin automático só é criado se não existir
+- Os dados do Docker Compose ficam em volumes persistentes
+- Os scripts escolhem uma porta livre automaticamente para a aplicação
+- PostgreSQL e MongoDB não precisam expor portas para o host, pois a aplicação acessa os bancos pela rede interna do Docker
+
+---
 
 ## 🐛 Troubleshooting
 
+### PowerShell bloqueou o script no Windows
+
+Rode:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\setup-docker-windows.ps1
+```
+
+Esse comando vale apenas para a sessão atual do PowerShell.
+
+---
+
+### Docker Desktop não iniciou
+
+Abra o Docker Desktop manualmente e aguarde ele terminar de iniciar.
+
+Depois rode novamente o script da sua plataforma.
+
+Linux/macOS:
+
+```bash
+./setup-docker.sh
+```
+
+Windows:
+
+```powershell
+.\setup-docker-windows.ps1
+```
+
+---
+
 ### Porta 3000 já está em uso
 
-```bash
-# Mudar porta em docker-compose.yml ou localizar processo
-lsof -i :3000
-kill -9 <PID>
+Os scripts tentam resolver isso automaticamente, usando `3001`, `3002`, etc.
+
+Ao final do setup, veja a URL exibida no terminal.
+
+Exemplo:
+
+```text
+Aplicação disponível em:
+http://localhost:3001
 ```
 
-### Docker não inicia
+---
+
+### Ver logs da aplicação
 
 ```bash
-# Verificar status do Docker
-docker ps
+docker compose logs -f app
+```
 
-# Rebuild de containers
+---
+
+### Rebuild dos containers
+
+```bash
 docker compose down
-docker compose up -d --build
+docker compose up --build -d
 ```
+
+---
+
+### Apagar todos os dados dos bancos Docker
+
+Cuidado: isso remove os volumes do PostgreSQL e MongoDB.
+
+```bash
+docker compose down -v
+```
+
+Depois rode novamente o script de setup.
+
+---
 
 ### Erro de conexão com PostgreSQL
 
-```bash
-# Verificar se container está rodando
-docker compose logs postgres
+Verifique os logs:
 
-# Testar conexão
-docker compose exec postgres psql -U postgres -d portfolio_receitas
+```bash
+docker compose logs postgres
+docker compose logs app
 ```
+
+Dentro do Docker, confirme que o `.env` usa:
+
+```env
+DB_HOST=postgres
+```
+
+e não:
+
+```env
+DB_HOST=localhost
+```
+
+---
+
+### Erro de conexão com MongoDB
+
+Verifique os logs:
+
+```bash
+docker compose logs mongodb
+docker compose logs app
+```
+
+Dentro do Docker, confirme que o `.env` usa:
+
+```env
+MONGO_URL=mongodb://mongodb:27017/portfolio_receitas
+```
+
+e não:
+
+```env
+MONGO_URL=mongodb://localhost:27017/portfolio_receitas
+```
+
+---
 
 ## 📄 Licença
 
@@ -214,4 +493,4 @@ ISC
 
 ---
 
-**Dúvidas?** Abra uma issue no repositório!
+**Dúvidas?** Abra uma issue no repositório.

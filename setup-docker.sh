@@ -4,7 +4,7 @@ set -e
 
 echo "========================================="
 echo "Setup com Docker - Portfolio de Receitas"
-echo "Linux/macOS"
+echo "Linux"
 echo "========================================="
 
 # Colors
@@ -16,7 +16,6 @@ NC='\033[0m'
 # Commands used later
 DOCKER_CMD="docker"
 COMPOSE_CMD="docker compose"
-OS_TYPE="unknown"
 
 info() {
   echo -e "${GREEN}[INFO]${NC} $1"
@@ -30,30 +29,7 @@ error() {
   echo -e "${RED}[ERRO]${NC} $1"
 }
 
-detect_os() {
-  OS_NAME="$(uname -s)"
-
-  case "$OS_NAME" in
-    Linux*)
-      OS_TYPE="linux"
-      info "Sistema detectado: Linux"
-      ;;
-    Darwin*)
-      OS_TYPE="macos"
-      info "Sistema detectado: macOS"
-      ;;
-    *)
-      error "Sistema não suportado por este script: $OS_NAME"
-      echo ""
-      echo "No Windows, use:"
-      echo "  setup-docker-windows.ps1"
-      echo ""
-      exit 1
-      ;;
-  esac
-}
-
-install_docker_linux() {
+install_docker() {
   warn "Docker não encontrado."
   warn "Instalando Docker usando o script oficial de conveniência."
 
@@ -68,49 +44,17 @@ install_docker_linux() {
   echo -e "${YELLOW}newgrp docker${NC}"
 }
 
-install_docker_macos() {
-  warn "Docker não encontrado."
-  warn "Tentando instalar Docker Desktop via Homebrew."
-
-  if ! command -v brew > /dev/null 2>&1; then
-    error "Homebrew não está instalado."
-    echo ""
-    echo "Instale o Docker Desktop manualmente:"
-    echo "https://docs.docker.com/desktop/setup/install/mac-install/"
-    echo ""
-    echo "Ou instale o Homebrew e rode este script novamente:"
-    echo "https://brew.sh/"
-    exit 1
-  fi
-
-  brew install --cask docker
-
-  info "Docker Desktop instalado."
-}
-
 check_or_install_docker() {
   info "Verificando Docker..."
 
-  if command -v docker > /dev/null 2>&1; then
+  if ! command -v docker > /dev/null 2>&1; then
+    install_docker
+  else
     info "Docker encontrado: $(docker --version)"
-    return
-  fi
-
-  if [ "$OS_TYPE" = "linux" ]; then
-    install_docker_linux
-  elif [ "$OS_TYPE" = "macos" ]; then
-    install_docker_macos
   fi
 }
 
-open_docker_desktop_macos() {
-  if [ -d "/Applications/Docker.app" ]; then
-    info "Abrindo Docker Desktop..."
-    open -a Docker || true
-  fi
-}
-
-check_docker_daemon_linux() {
+check_docker_daemon() {
   info "Verificando se o Docker daemon está rodando..."
 
   if docker info > /dev/null 2>&1; then
@@ -125,6 +69,7 @@ check_docker_daemon_linux() {
   if command -v systemctl > /dev/null 2>&1; then
     sudo systemctl start docker || true
     sudo systemctl enable docker || true
+
     sleep 3
   fi
 
@@ -155,54 +100,22 @@ check_docker_daemon_linux() {
   echo -e "${YELLOW}newgrp docker${NC}"
   echo ""
   echo "Depois rode novamente:"
-  echo -e "${YELLOW}./setup-docker.sh${NC}"
+  echo -e "${YELLOW}./setup-docker-linux.sh${NC}"
   echo ""
 
   exit 1
 }
 
-check_docker_daemon_macos() {
-  info "Verificando se o Docker daemon está rodando..."
+check_compose() {
+  info "Verificando Docker Compose..."
 
-  if docker info > /dev/null 2>&1; then
-    info "Docker daemon está rodando."
+  if $DOCKER_CMD compose version > /dev/null 2>&1; then
+    COMPOSE_CMD="$DOCKER_CMD compose"
+    info "Docker Compose encontrado: $($DOCKER_CMD compose version)"
     return
   fi
 
-  warn "Docker Desktop ainda não está pronto."
-  open_docker_desktop_macos
-
-  echo ""
-  echo "Aguardando Docker Desktop iniciar..."
-  echo "Se aparecer uma janela do Docker Desktop, aceite as permissões necessárias."
-  echo ""
-
-  for i in {1..60}; do
-    if docker info > /dev/null 2>&1; then
-      info "Docker daemon está rodando."
-      return
-    fi
-
-    sleep 2
-  done
-
-  error "Docker Desktop não iniciou a tempo."
-  echo ""
-  echo "Abra o Docker Desktop manualmente e rode novamente:"
-  echo -e "${YELLOW}./setup-docker.sh${NC}"
-  echo ""
-  exit 1
-}
-
-check_docker_daemon() {
-  if [ "$OS_TYPE" = "linux" ]; then
-    check_docker_daemon_linux
-  elif [ "$OS_TYPE" = "macos" ]; then
-    check_docker_daemon_macos
-  fi
-}
-
-check_compose_linux_install() {
+  error "Docker Compose não está disponível."
   warn "Tentando instalar o plugin Docker Compose..."
 
   if command -v apt-get > /dev/null 2>&1; then
@@ -218,40 +131,14 @@ check_compose_linux_install() {
     echo "https://docs.docker.com/compose/install/linux/"
     exit 1
   fi
-}
-
-check_compose() {
-  info "Verificando Docker Compose..."
 
   if $DOCKER_CMD compose version > /dev/null 2>&1; then
     COMPOSE_CMD="$DOCKER_CMD compose"
-    info "Docker Compose encontrado: $($DOCKER_CMD compose version)"
-    return
-  fi
-
-  error "Docker Compose não está disponível."
-
-  if [ "$OS_TYPE" = "linux" ]; then
-    check_compose_linux_install
-
-    if $DOCKER_CMD compose version > /dev/null 2>&1; then
-      COMPOSE_CMD="$DOCKER_CMD compose"
-      info "Docker Compose instalado: $($DOCKER_CMD compose version)"
-      return
-    fi
-  fi
-
-  if [ "$OS_TYPE" = "macos" ]; then
-    echo ""
-    echo "No macOS, Docker Compose vem junto com o Docker Desktop."
-    echo "Atualize ou reinstale o Docker Desktop:"
-    echo "https://docs.docker.com/desktop/setup/install/mac-install/"
-    echo ""
+    info "Docker Compose instalado: $($DOCKER_CMD compose version)"
+  else
+    error "Docker Compose ainda não está disponível após a instalação."
     exit 1
   fi
-
-  error "Docker Compose ainda não está disponível."
-  exit 1
 }
 
 write_env_file() {
@@ -296,11 +183,37 @@ create_or_fix_env() {
     NEEDS_REWRITE=true
   fi
 
-  for KEY in APP_PORT ADMIN_NAME ADMIN_EMAIL ADMIN_PASSWORD DB_NAME DB_USER DB_PASSWORD SESSION_SECRET MONGO_URL; do
-    if ! grep -q "^${KEY}=" .env; then
-      NEEDS_REWRITE=true
-    fi
-  done
+  if ! grep -q "^APP_PORT=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^ADMIN_NAME=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^ADMIN_EMAIL=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^ADMIN_PASSWORD=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^DB_NAME=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^DB_USER=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^DB_PASSWORD=" .env; then
+    NEEDS_REWRITE=true
+  fi
+
+  if ! grep -q "^SESSION_SECRET=" .env; then
+    NEEDS_REWRITE=true
+  fi
 
   if [ "$NEEDS_REWRITE" = true ]; then
     warn "O arquivo .env existente não está pronto para Docker."
@@ -325,12 +238,7 @@ is_port_in_use() {
   fi
 
   if command -v lsof > /dev/null 2>&1; then
-    if [ "$OS_TYPE" = "macos" ]; then
-      lsof -iTCP:"$PORT" -sTCP:LISTEN > /dev/null 2>&1
-    else
-      lsof -i :"$PORT" > /dev/null 2>&1
-    fi
-
+    lsof -i :"$PORT" > /dev/null 2>&1
     return $?
   fi
 
@@ -348,11 +256,7 @@ set_app_port() {
   done
 
   if grep -q "^APP_PORT=" .env; then
-    if [ "$OS_TYPE" = "macos" ]; then
-      sed -i '' "s/^APP_PORT=.*/APP_PORT=$APP_PORT_VALUE/" .env
-    else
-      sed -i "s/^APP_PORT=.*/APP_PORT=$APP_PORT_VALUE/" .env
-    fi
+    sed -i "s/^APP_PORT=.*/APP_PORT=$APP_PORT_VALUE/" .env
   else
     echo "" >> .env
     echo "APP_PORT=$APP_PORT_VALUE" >> .env
@@ -389,7 +293,6 @@ start_containers() {
   echo "  Parar e apagar dados dos bancos: $COMPOSE_CMD down -v"
 }
 
-detect_os
 check_or_install_docker
 check_docker_daemon
 check_compose
